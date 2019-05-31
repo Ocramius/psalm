@@ -140,6 +140,30 @@ class ConstFetchAnalyzer
                     }
                 }
 
+                if ($codebase->migrations
+                    && $context->calling_method_id
+                    && isset($codebase->migrations[strtolower($context->calling_method_id)])
+                    && strtolower(explode('::', $context->calling_method_id)[0]) === strtolower($fq_class_name)
+                ) {
+                    $file_manipulations = [];
+
+                    $file_manipulations[] = new \Psalm\FileManipulation(
+                        $stmt->class->getAttribute('startFilePos'),
+                        $stmt->class->getAttribute('endFilePos') + 1,
+                        Type::getStringFromFQCLN(
+                            $fq_class_name,
+                            $statements_analyzer->getNamespace(),
+                            $statements_analyzer->getAliasedClassesFlipped(),
+                            null
+                        )
+                    );
+
+                    \Psalm\Internal\FileManipulation\FileManipulationBuffer::add(
+                        $statements_analyzer->getFilePath(),
+                        $file_manipulations
+                    );
+                }
+
                 if ($stmt->name instanceof PhpParser\Node\Identifier && $stmt->name->name === 'class') {
                     $stmt->inferredType = Type::getLiteralClassString($fq_class_name);
 

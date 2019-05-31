@@ -354,8 +354,12 @@ class Union
      *
      * @return string
      */
-    public function toNamespacedString($namespace, array $aliased_classes, $this_class, $use_phpdoc_format)
-    {
+    public function toNamespacedString(
+        ?string $namespace,
+        array $aliased_classes,
+        ?string $this_class,
+        bool $use_phpdoc_format
+    ) {
         $printed_int = false;
         $printed_float = false;
         $printed_string = false;

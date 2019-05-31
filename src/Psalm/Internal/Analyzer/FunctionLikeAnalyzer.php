@@ -865,6 +865,8 @@ abstract class FunctionLikeAnalyzer extends SourceAnalyzer implements Statements
             }
         }
 
+        $declaring_method_id = $this->getMethodId($context->self);
+
         if ($add_mutations) {
             if ($this->return_vars_in_scope !== null) {
                 $context->vars_in_scope = TypeAnalyzer::combineKeyedTypes(

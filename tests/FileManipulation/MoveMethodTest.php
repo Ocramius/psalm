@@ -57,6 +57,8 @@ class MoveMethodTest extends \Psalm\Tests\TestCase
             $input_code
         );
 
+        $this->project_analyzer->getCodebase()->migrations = $methods_to_move;
+
         $this->project_analyzer->alterCodeAfterCompletion(
             false,
             false
@@ -64,11 +66,7 @@ class MoveMethodTest extends \Psalm\Tests\TestCase
 
         $this->analyzeFile($file_path, $context);
 
-        $this->project_analyzer->checkClassReferences();
-
         $codebase = $this->project_analyzer->getCodebase();
-
-        $codebase->migrations = $methods_to_move;
 
         $codebase->analyzer->updateFile($file_path, false);
         $this->assertSame($output_code, $codebase->getFileContents($file_path));
@@ -82,31 +80,35 @@ class MoveMethodTest extends \Psalm\Tests\TestCase
             'moveStaticMethodWithNoReferences' => [
                 '<?php
                     class A {
-                        const FOO = 5;
+                        const C = 5;
 
-                        public static function foo() : void {
-                            echo self::FOO;
+                        public static function Foo() : void {
+                            echo self::C;
                         }
                     }
 
                     class B {
-                        public static function bar() : void {}
+                        public static function bar() : void {
+                            A::Foo();
+                        }
                     }',
                 '<?php
                     class A {
-                        const FOO = 5;
+                        const C = 5;
                     }
 
                     class B {
-                        public static function bar() : void {}
+                        public static function bar() : void {
+                            B::Fe();
+                        }
 
-                        public static function foo() : void {
-                            echo A::FOO;
+                        public static function Fe() : void {
+                            echo A::C;
                         }
                     }',
                 [
-                    'A::foo' => 'B::foo',
-                    'A::foo\((.*\))' => 'B::foo($1)',
+                    'a::foo' => 'B::Fe',
+                    'a::foo\((.*\))' => 'B::Fe($1)',
                 ]
             ]
         ];
